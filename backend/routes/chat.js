@@ -1,6 +1,7 @@
 const express = require('express');
 const { ChatOpenAI } = require('@langchain/openai');
 const { SystemMessage, HumanMessage, AIMessage } = require('langchain/schema');
+const chromaService = require('../services/chromaService');
 const router = express.Router();
 
 // Initialize LangChain ChatOpenAI model
@@ -11,26 +12,34 @@ const chatModel = new ChatOpenAI({
   maxCompletionTokens: 100
 });
 
-// System message for Long COVID assistance
-const systemMessage = new SystemMessage(`You are a knowledgeable and empathetic assistant specializing in Long COVID (Post-COVID-19 condition). You provide accurate, up-to-date information about:
+// System message for bipolar disorder assistance with RAG
+const createSystemMessage = (relevantStudies = []) => {
+  let systemContent = `You are a knowledgeable and empathetic assistant specializing in bipolar disorder. You provide accurate, up-to-date information based on current research and clinical guidelines.`;
 
-- Long COVID symptoms and their management
-- Treatment approaches and therapies
-- Current research and clinical trials
-- Lifestyle modifications and coping strategies
-- When to seek medical care
+  if (relevantStudies.length > 0) {
+    systemContent += `\n\nRelevant research context:\n`;
+    relevantStudies.forEach((study, index) => {
+      systemContent += `\n${index + 1}. ${study.citation}\n${study.content}\n`;
+    });
+    systemContent += `\nUse this research context to inform your response. Always cite sources when referencing specific studies.`;
+  }
 
-Guidelines for your responses:
+  systemContent += `\n\nGuidelines for your responses:
 - Be empathetic and understanding
 - Provide evidence-based information
 - Always recommend consulting healthcare professionals for medical decisions
-- Acknowledge the complexity and variability of Long COVID
+- Acknowledge the complexity and variability of bipolar disorder experiences
 - Keep responses concise but informative
 - Avoid giving specific medical diagnoses or prescribing treatments
+- When referencing research, include citations
+- Be sensitive to mood episodes and crisis situations
 
-If asked about topics unrelated to Long COVID, politely redirect the conversation back to Long COVID-related topics.
+If asked about topics unrelated to bipolar disorder, politely redirect the conversation back to bipolar disorder-related topics.
 
-Do not assume the human has COVID.`);
+Do not assume the human has bipolar disorder or make diagnostic assessments.`;
+
+  return new SystemMessage(systemContent);
+};
 
 // Function to estimate token count (rough approximation)
 function estimateTokens(text) {
@@ -39,8 +48,8 @@ function estimateTokens(text) {
 }
 
 // Function to trim conversation history to fit within token limit
-function trimConversationHistory(messages, maxTokens = 30000) {
-  let totalTokens = estimateTokens(systemMessage.content);
+function trimConversationHistory(messages, systemMessageContent, maxTokens = 30000) {
+  let totalTokens = estimateTokens(systemMessageContent);
   const trimmedMessages = [];
   
   // Process messages from most recent to oldest
@@ -83,8 +92,18 @@ router.post('/', async (req, res) => {
       return res.status(500).json({ error: 'OpenAI API key not configured' });
     }
 
+    // Initialize Chroma service
+    await chromaService.initialize();
+
+    // Query relevant studies for the user's message
+    const lastUserMessage = userMessages[userMessages.length - 1];
+    const relevantStudies = await chromaService.queryRelevantStudies(lastUserMessage, 3);
+
+    // Create system message with relevant studies
+    const systemMessage = createSystemMessage(relevantStudies);
+
     // Trim conversation history to fit within token limits
-    const trimmedHistory = trimConversationHistory(conversationHistory);
+    const trimmedHistory = trimConversationHistory(conversationHistory, systemMessage.content);
 
     // Build messages array for ChatOpenAI
     const chatMessages = [systemMessage];
@@ -113,7 +132,11 @@ router.post('/', async (req, res) => {
     }
 
     res.json({
-      response: aiResponse.trim()
+      response: aiResponse.trim(),
+      sources: relevantStudies.map(study => ({
+        citation: study.citation,
+        similarity: study.similarity
+      }))
     });
     
   } catch (error) {

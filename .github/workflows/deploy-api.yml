@@ -1,0 +1,9 @@
+permissions:
+  id-token: write
+  contents: read
+
+- name: Configure AWS
+  uses: aws-actions/configure-aws-credentials@v4
+  with:
+    role-to-assume: arn:aws:iam::983774590472:role/github-actions-bipolar-deployer
+    aws-region: us-east-1

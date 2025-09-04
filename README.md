@@ -1,11 +1,11 @@
-# Long COVID Chat Application
+# Bipolar Disorder Chat Application
 
-A full-stack chat application for Long COVID information and support, powered by GPT-5 via LangChain.
+A full-stack chat application for bipolar disorder information and support, powered by GPT-5 via LangChain.
 
 ## Project Structure
 
 ```
-longcovid/
+bipolar/
 ├── backend/          # Node.js/Express API server
 ├── frontend/         # React frontend application  
 ├── .gitignore        # Git ignore rules
@@ -111,7 +111,7 @@ The frontend will run on `http://localhost:3000`
 
 - `GET /health` - Health check
 - `GET /api` - API information
-- `POST /api/chat` - Chat with Long COVID assistant
+- `POST /api/chat` - Chat with bipolar disorder assistant
 
 ## Features
 

@@ -1,7 +1,7 @@
 {
-  "name": "longcovid-backend",
+  "name": "bipolar-backend",
   "version": "1.0.0",
-  "description": "Long COVID backend API server",
+  "description": "Bipolar disorder backend API server",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
@@ -15,7 +15,8 @@
     "morgan": "^1.10.0",
     "dotenv": "^16.3.1",
     "langchain": "^0.1.25",
-    "@langchain/openai": "^0.0.14"
+    "@langchain/openai": "^0.0.14",
+    "aws-sdk": "^2.1567.0"
   },
   "devDependencies": {
     "nodemon": "^3.0.1",
@@ -26,7 +27,7 @@
     "node": ">=18.0.0"
   },
   "keywords": [
-    "longcovid",
+    "bipolar",
     "api",
     "express",
     "backend"

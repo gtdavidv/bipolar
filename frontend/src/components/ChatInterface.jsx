@@ -12,7 +12,7 @@ const ChatInterface = () => {
 
   // Load messages from localStorage on component mount
   useEffect(() => {
-    const savedMessages = localStorage.getItem('longcovid-chat-messages')
+    const savedMessages = localStorage.getItem('bipolar-chat-messages')
     if (savedMessages) {
       setMessages(JSON.parse(savedMessages))
     }
@@ -20,7 +20,7 @@ const ChatInterface = () => {
 
   // Save messages to localStorage whenever messages change
   useEffect(() => {
-    localStorage.setItem('longcovid-chat-messages', JSON.stringify(messages))
+    localStorage.setItem('bipolar-chat-messages', JSON.stringify(messages))
   }, [messages])
 
   // Auto-scroll to bottom when new messages are added
@@ -115,13 +115,13 @@ const ChatInterface = () => {
 
   const clearChat = () => {
     setMessages([])
-    localStorage.removeItem('longcovid-chat-messages')
+    localStorage.removeItem('bipolar-chat-messages')
   }
 
   return (
     <div className="chat-interface">
       <div className="chat-header">
-        <h2>Chat with Long COVID Assistant</h2>
+        <h2>Chat with Bipolar Disorder Assistant</h2>
         <button onClick={clearChat} className="clear-button">
           Clear Chat
         </button>
@@ -130,7 +130,7 @@ const ChatInterface = () => {
       <div className="messages-container">
         {messages.length === 0 ? (
           <div className="empty-state">
-            <p>Start a conversation about Long COVID symptoms, treatments, or research.</p>
+            <p>Start a conversation about bipolar disorder symptoms, treatments, or research.</p>
           </div>
         ) : (
           messages.map((message) => (

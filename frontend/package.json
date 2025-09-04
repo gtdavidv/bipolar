@@ -1,7 +1,7 @@
 {
-  "name": "longcovid-frontend",
+  "name": "bipolar-frontend",
   "version": "1.0.0",
-  "description": "Long COVID React frontend",
+  "description": "Bipolar disorder React frontend",
   "private": true,
   "scripts": {
     "dev": "vite",
