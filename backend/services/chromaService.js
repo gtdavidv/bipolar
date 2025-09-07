@@ -1,5 +1,4 @@
 const { ChromaClient } = require('chromadb');
-const { HuggingFaceTransformersEmbeddings } = require('@langchain/community/embeddings/hf_transformers');
 
 class ChromaService {
   constructor() {
@@ -8,9 +7,10 @@ class ChromaService {
     });
     
     // Initialize local embedding model (sentence-transformers)
-    this.embedder = new HuggingFaceTransformersEmbeddings({
-      modelName: 'sentence-transformers/all-MiniLM-L6-v2',
-    });
+    this.embedder = import('@langchain/community/embeddings/hf_transformers')
+      .then(m => new (m.HuggingFaceTransformersEmbeddings ?? m.HfTransformersEmbeddings ?? m.default)({
+        modelName: 'sentence-transformers/all-MiniLM-L6-v2',
+      }));
     
     this.collection = null;
     this.collectionName = 'bipolar_studies';
@@ -38,7 +38,8 @@ class ChromaService {
 
     try {
       // Generate embedding for the query using local model
-      const queryEmbedding = await this.embedder.embedQuery(userQuery);
+      const emb = await this.embedder;
+      const queryEmbedding = await emb.embedQuery(userQuery);
       
       const results = await this.collection.query({
         queryEmbeddings: [queryEmbedding],

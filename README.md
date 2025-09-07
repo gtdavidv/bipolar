@@ -50,13 +50,6 @@ cd frontend
 # Install dependencies
 npm install
 
-# Start development server
-npm run devaws eks describe-fargate-profile \
-  --cluster-name extravagant-electro-mountain \
-  --fargate-profile-name kube-system \
-  --query "fargateProfile.status"
-```
-
 The frontend will run on `http://localhost:3000`
 
 ## Running the Application
