@@ -54,13 +54,13 @@ jobs:
       - name: Update image in task def
         run: |
           IMAGE="${{ steps.repo.outputs.uri }}:latest"
-          # replace image for the container named $CONTAINER_NAME
-          cat td.json \
-          | jq --arg IMG "$IMAGE" --arg NAME "$CONTAINER_NAME" '
-              .containerDefinitions = (.containerDefinitions
-                | map(if .name == $NAME then .image = $IMG | . else . end))
-              | del(.taskDefinitionArn,.revision,.status,.requiresAttributes,.compatibilities,.registeredAt,.registeredBy)'
-          > td-new.json
+          jq --arg IMG "$IMAGE" --arg NAME "$CONTAINER_NAME" '
+            .containerDefinitions |= ( map( if .name == $NAME then .image = $IMG else . end ) )
+            | del(.taskDefinitionArn,.revision,.status,.requiresAttributes,.compatibilities,.registeredAt,.registeredBy)
+          ' td.json > td-new.json
+          # validate JSON
+          jq -e . td-new.json >/dev/null
+          head -c 500 td-new.json || true
 
       - name: Register new task def
         run: |
