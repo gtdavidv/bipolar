@@ -37,9 +37,18 @@ jobs:
           npm ci
           npm run build
 
-      - name: Sync to S3
+      - name: Determine build path
+        id: path
         run: |
-          aws s3 sync frontend/build "s3://${FE_BUCKET}" --delete
+          for d in build dist out; do
+            if [ -d "frontend/$d" ]; then
+              echo "dir=frontend/$d" >> "$GITHUB_OUTPUT"; exit 0
+            fi
+          done
+          echo "No build dir found"; exit 1
+      
+      - name: Sync to S3
+        run: aws s3 sync "${{ steps.path.outputs.dir }}" "s3://${FE_BUCKET}" --delete
 
       - name: Invalidate CloudFront
         run: |
