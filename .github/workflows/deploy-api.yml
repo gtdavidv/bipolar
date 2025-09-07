@@ -1,9 +1,78 @@
+name: Deploy API
+
+on:
+  push:
+    branches: [ main ]
+    paths: [ "api/**", "backend/**", ".github/workflows/deploy-api.yml" ]
+
 permissions:
   id-token: write
   contents: read
 
-- name: Configure AWS
-  uses: aws-actions/configure-aws-credentials@v4
-  with:
-    role-to-assume: arn:aws:iam::983774590472:role/github-actions-bipolar-deployer
-    aws-region: us-east-1
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    env:
+      AWS_REGION: us-east-1
+      CLUSTER: bipolar-cluster
+      SERVICE: bipolar-api-svc
+      TASK_FAMILY: bipolar-api
+      CONTAINER_NAME: api
+      ECR_REPO: bipolar-app
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure AWS
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::983774590472:role/github-ecr
+          aws-region: us-east-1
+
+      - name: Login to ECR
+        id: ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Resolve ECR repo URI
+        id: repo
+        run: |
+          URI=$(aws ecr describe-repositories --repository-names "$ECR_REPO" --query 'repositories[0].repositoryUri' --output text)
+          echo "uri=$URI" >> "$GITHUB_OUTPUT"
+
+      - name: Build image
+        run: |
+          IMAGE="${{ steps.repo.outputs.uri }}"
+          SHA="${GITHUB_SHA}"
+          docker build -t "$IMAGE:latest" -t "$IMAGE:$SHA" ./backend
+          docker push "$IMAGE:latest"
+          docker push "$IMAGE:$SHA"
+
+      - name: Fetch current task def
+        run: |
+          aws ecs describe-task-definition --task-definition "$TASK_FAMILY" \
+            --query 'taskDefinition' > td.json
+
+      - name: Update image in task def
+        run: |
+          IMAGE="${{ steps.repo.outputs.uri }}:latest"
+          # replace image for the container named $CONTAINER_NAME
+          cat td.json \
+          | jq --arg IMG "$IMAGE" --arg NAME "$CONTAINER_NAME" '
+              .containerDefinitions = (.containerDefinitions
+                | map(if .name == $NAME then .image = $IMG | . else . end))
+              | del(.taskDefinitionArn,.revision,.status,.requiresAttributes,.compatibilities,.registeredAt,.registeredBy)'
+          > td-new.json
+
+      - name: Register new task def
+        run: |
+          ARN=$(aws ecs register-task-definition --cli-input-json file://td-new.json \
+                --query 'taskDefinition.taskDefinitionArn' --output text)
+          echo "arn=$ARN" >> $GITHUB_ENV
+
+      - name: Deploy service
+        run: |
+          aws ecs update-service \
+            --cluster "$CLUSTER" \
+            --service "$SERVICE" \
+            --task-definition "$arn" \
+            --force-new-deployment
+          aws ecs wait services-stable --cluster "$CLUSTER" --services "$SERVICE"

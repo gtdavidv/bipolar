@@ -1,3 +1,11 @@
 node_modules
 dist
 .env
+
+.terraform/
+terraform.tfstate
+terraform.tfstate.*
+crash.log
+*.tfvars
+*.tfplan
+override.tf

@@ -1,0 +1,46 @@
+name: Deploy Frontend
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - "frontend/**"
+      - ".github/workflows/deploy-frontend.yml"
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    env:
+      FE_BUCKET: terraform-20250907201205156800000001
+      CF_DIST_ID: E1NXDXKR1Q01XI
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure AWS
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::983774590472:role/github-ecr
+          aws-region: us-east-1
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install & build
+        working-directory: frontend
+        run: |
+          npm ci
+          npm run build
+
+      - name: Sync to S3
+        run: |
+          aws s3 sync frontend/build "s3://${FE_BUCKET}" --delete
+
+      - name: Invalidate CloudFront
+        run: |
+          aws cloudfront create-invalidation --distribution-id "$CF_DIST_ID" --paths "/*"
