@@ -1,5 +1,9 @@
-# Use Node.js LTS version
-FROM node:18-alpine
+FROM node:20
+WORKDIR /app
+COPY package*.json ./
+RUN npm ci
+COPY . .
+CMD ["npm","start"]
 
 # Set working directory
 WORKDIR /app
