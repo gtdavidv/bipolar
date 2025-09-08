@@ -1,36 +1,27 @@
 FROM node:20
-WORKDIR /app
-COPY package*.json ./
-RUN npm ci
-COPY . .
-CMD ["npm","start"]
 
-# Set working directory
+# Working dir
 WORKDIR /app
 
-# Copy package files
+# Install deps (prod-only; adjust if your build needs dev deps)
 COPY package*.json ./
+ENV NODE_ENV=production
+RUN npm ci --omit=dev
 
-# Install dependencies
-RUN npm ci --only=production
-
-# Copy application code
+# Copy source
 COPY . .
 
-# Create non-root user for security
-RUN addgroup -g 1001 -S nodejs
-RUN adduser -S nodejs -u 1001
-
-# Change ownership of the app directory to nodejs user
-RUN chown -R nodejs:nodejs /app
+# Non-root user (Debian tools)
+RUN groupadd -g 1001 nodejs \
+ && useradd -u 1001 -g nodejs -m nodejs \
+ && chown -R nodejs:nodejs /app
 USER nodejs
 
-# Expose port
-EXPOSE 3001
+# App port + healthcheck (aligns with ECS target group on 8000)
+ENV PORT=8000
+EXPOSE 8000
+HEALTHCHECK --interval=30s --timeout=3s --start-period=10s --retries=3 \
+  CMD node -e "require('http').get(`http://localhost:${process.env.PORT||8000}/health`,r=>process.exit(r.statusCode===200?0:1)).on('error',()=>process.exit(1))"
 
-# Health check
-HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-  CMD node -e "require('http').get('http://localhost:3001/health', (res) => { process.exit(res.statusCode === 200 ? 0 : 1) })"
-
-# Start the application
-CMD ["npm", "start"]
+# Start
+CMD ["npm","start"]
