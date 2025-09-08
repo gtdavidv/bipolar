@@ -163,7 +163,10 @@ const AddArticle = () => {
             <div className="content-help">
               <p><strong>Formatting tips:</strong></p>
               <ul>
-                <li>Use line breaks to separate paragraphs</li>
+                <li>Use single line breaks for line breaks within a paragraph</li>
+                <li>Use double line breaks (press Enter twice) to create new paragraphs with spacing</li>
+                <li>Keep paragraphs focused and readable</li>
+                <li>Include accurate, evidence-based information</li>
                 <li>Remember to cite sources when referencing studies</li>
               </ul>
             </div>

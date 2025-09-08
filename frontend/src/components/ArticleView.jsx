@@ -104,16 +104,22 @@ const ArticleView = () => {
         </header>
 
         <div className="article-body">
-          {article.content.split('\n').map((paragraph, index) => {
+          {article.content.split('\n\n').map((paragraph, index) => {
             if (paragraph.trim() === '') {
-              return <br key={index} />
+              return null
             }
+            
+            // Handle single newlines within paragraphs as line breaks
+            const lines = paragraph.split('\n').map((line, lineIndex) => (
+              lineIndex === 0 ? line : [<br key={lineIndex} />, line]
+            )).flat()
+            
             return (
               <p key={index} className="article-paragraph">
-                {paragraph}
+                {lines}
               </p>
             )
-          })}
+          }).filter(Boolean)}
         </div>
       </article>
 

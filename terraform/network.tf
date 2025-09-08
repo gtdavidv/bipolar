@@ -160,6 +160,23 @@ resource "aws_iam_role_policy_attachment" "task_exec_attach1" {
   policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
 }
 
+data "aws_secretsmanager_secret" "openai" { name = "bipolar_openai_key" }
+
+data "aws_iam_policy_document" "exec_sm_read" {
+  statement {
+    actions   = ["secretsmanager:GetSecretValue"]
+    resources = [data.aws_secretsmanager_secret.openai.arn]
+  }
+}
+resource "aws_iam_policy" "exec_sm_read" {
+  name   = "bipolar-exec-sm-read"
+  policy = data.aws_iam_policy_document.exec_sm_read.json
+}
+resource "aws_iam_role_policy_attachment" "exec_sm_attach" {
+  role       = aws_iam_role.task_execution.name
+  policy_arn = aws_iam_policy.exec_sm_read.arn
+}
+
 # Task role (app permissions) – DynamoDB access (tighten later)
 resource "aws_iam_role" "task_role" {
   name = "bipolar-task-role"
@@ -236,8 +253,12 @@ resource "aws_ecs_task_definition" "api" {
         awslogs-stream-prefix = "ecs"
       }
     }
-    essential = true
-    environment = [] # add APP env vars later or via Secrets Manager
+    essential   = true
+    environment = []
+    secrets     = [{
+      name      = "OPENAI_API_KEY",
+      valueFrom = "${data.aws_secretsmanager_secret.openai.arn}:bipolar_openai_key::"
+    }]
   }])
   runtime_platform {
     operating_system_family="LINUX"
@@ -253,6 +274,7 @@ resource "aws_ecs_service" "api" {
   desired_count   = 1
   launch_type     = "FARGATE"
   enable_execute_command = true
+  health_check_grace_period_seconds = 60
 
   network_configuration {
     subnets         = [for s in aws_subnet.public : s.id]
