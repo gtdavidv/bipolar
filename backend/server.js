@@ -15,11 +15,6 @@ app.use(morgan('combined'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Serve static files from frontend in production
-if (process.env.NODE_ENV === 'production') {
-  app.use(express.static(path.join(__dirname, '../frontend/dist')));
-}
-
 // API Routes
 app.use('/api', require('./routes'));
 
@@ -27,13 +22,6 @@ app.use('/api', require('./routes'));
 app.get('/health', (req, res) => {
   res.json({ status: 'OK', timestamp: new Date().toISOString() });
 });
-
-// Serve React app for any non-API routes in production
-if (process.env.NODE_ENV === 'production') {
-  app.get('*', (req, res) => {
-    res.sendFile(path.join(__dirname, '../frontend/dist/index.html'));
-  });
-}
 
 // Error handling middleware
 app.use((err, req, res, next) => {
