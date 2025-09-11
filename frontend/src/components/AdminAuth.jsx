@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import useAuth from '../hooks/useAuth'
-import './AdminAuth.css'
+import '../styles/AdminAuth.css'
 
 const AdminAuth = ({ children, title = "Admin Access Required", showNavigation = true }) => {
   const { isAuthenticated, authToken, loading, login, logout } = useAuth()

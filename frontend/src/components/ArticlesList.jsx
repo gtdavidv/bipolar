@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import axios from 'axios'
-import './ArticlesList.css'
+import '../styles/ArticlesList.css'
 //import { API_BASE } from '../App.jsx'
 
 const ArticlesList = () => {

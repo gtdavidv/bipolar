@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom'
 import axios from 'axios'
 import AdminAuth from './AdminAuth'
 import useAuth from '../hooks/useAuth'
-import './AdminManage.css'
+import '../styles/AdminManage.css'
 
 const AdminManage = () => {
   const { authToken } = useAuth()

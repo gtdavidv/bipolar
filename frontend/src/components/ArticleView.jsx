@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useParams, Link, useNavigate } from 'react-router-dom'
 import axios from 'axios'
-import './ArticleView.css'
+import '../styles/ArticleView.css'
 //import { API_BASE } from '../App.jsx'
 
 const ArticleView = () => {

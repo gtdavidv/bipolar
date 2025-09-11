@@ -19,14 +19,19 @@ const useAuth = () => {
     
     try {
       const response = await axios.post('/api/admin/login', { password })
-      const token = response.data.token
+      const token = response.data.token;
       
       setAuthToken(token)
       setIsAuthenticated(true)
       localStorage.setItem('admin-token', token)
       
       return { success: true, message: 'Login successful!' }
+      
     } catch (error) {
+      if (error.response?.status === 401) {
+        logout();
+      }
+      
       console.error('Login error:', error)
       
       let errorMessage = 'Login failed - please try again'
@@ -40,15 +45,16 @@ const useAuth = () => {
       }
       
       return { success: false, message: errorMessage }
+    
     } finally {
       setLoading(false)
     }
   }
 
   const logout = () => {
-    setIsAuthenticated(false)
-    setAuthToken('')
-    localStorage.removeItem('admin-token')
+    setIsAuthenticated(false);
+    setAuthToken('');
+    localStorage.removeItem('admin-token');
   }
 
   return {
