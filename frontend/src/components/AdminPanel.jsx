@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import axios from 'axios'
 import './AdminPanel.css'
-import { API_BASE } from '../App.jsx'
+//import { API_BASE } from '../App.jsx'
 
 const AdminPanel = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false)
@@ -27,7 +27,7 @@ const AdminPanel = () => {
     setLoading(true)
     
     try {
-      const response = await axios.post(`${API_BASE}/api/admin/login`, { password })
+      const response = await axios.post(`/api/admin/login`, { password })
       const token = response.data.token
       
       setAuthToken(token)
@@ -47,7 +47,7 @@ const AdminPanel = () => {
 
   const fetchArticles = async (token) => {
     try {
-      const response = await axios.get(`${API_BASE}/api/articles`, {
+      const response = await axios.get(`/api/articles`, {
         headers: { Authorization: `Bearer ${token}` }
       })
       setArticles(response.data)
@@ -70,14 +70,14 @@ const AdminPanel = () => {
 
       if (editingSlug) {
         // Update existing article
-        await axios.put(`${API_BASE}/api/admin/articles/${editingSlug}`, 
+        await axios.put(`/api/admin/articles/${editingSlug}`, 
           { title, content },
           { headers: { Authorization: `Bearer ${authToken}` }}
         )
         setMessage('Article updated successfully!')
       } else {
         // Create new article
-        await axios.post(`${API_BASE}/api/admin/articles`, 
+        await axios.post(`/api/admin/articles`, 
           { title, content },
           { headers: { Authorization: `Bearer ${authToken}` }}
         )
@@ -108,7 +108,7 @@ const AdminPanel = () => {
 
     setLoading(true)
     try {
-      await axios.delete(`${API_BASE}/api/admin/articles/${slug}`, {
+      await axios.delete(`/api/admin/articles/${slug}`, {
         headers: { Authorization: `Bearer ${authToken}` }
       })
       setMessage('Article deleted successfully!')

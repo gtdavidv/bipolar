@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import axios from 'axios'
 import './ArticlesList.css'
-import { API_BASE } from '../App.jsx'
+//import { API_BASE } from '../App.jsx'
 
 const ArticlesList = () => {
   const [articles, setArticles] = useState([])
@@ -12,7 +12,7 @@ const ArticlesList = () => {
   useEffect(() => {
     const fetchArticles = async () => {
       try {
-        const response = await axios.get(`${API_BASE}/api/articles`)
+        const response = await axios.get(`/api/articles`)
         setArticles(response.data)
       } catch (error) {
         setError('Failed to fetch articles')

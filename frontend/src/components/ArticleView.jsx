@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { useParams, Link, useNavigate } from 'react-router-dom'
 import axios from 'axios'
 import './ArticleView.css'
-import { API_BASE } from '../App.jsx'
+//import { API_BASE } from '../App.jsx'
 
 const ArticleView = () => {
   const { slug } = useParams()
@@ -14,7 +14,7 @@ const ArticleView = () => {
   useEffect(() => {
     const fetchArticle = async () => {
       try {
-        const response = await axios.get(`${API_BASE}/api/articles/${slug}`)
+        const response = await axios.get(`/api/articles/${slug}`)
         setArticle(response.data)
       } catch (error) {
         if (error.response?.status === 404) {

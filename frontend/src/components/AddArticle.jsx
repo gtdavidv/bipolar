@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import axios from 'axios'
 import './AddArticle.css'
-import { API_BASE } from '../App.jsx'
+//import { API_BASE } from '../App.jsx'
 
 const AddArticle = () => {
   const navigate = useNavigate()
@@ -26,7 +26,7 @@ const AddArticle = () => {
     setLoading(true)
     
     try {
-      const response = await axios.post(`${API_BASE}/api/admin/login`, { password })
+      const response = await axios.post(`/api/admin/login`, { password })
       const token = response.data.token
       
       setAuthToken(token)
@@ -54,7 +54,7 @@ const AddArticle = () => {
         return
       }
 
-      await axios.post(`${API_BASE}/api/admin/articles`, 
+      await axios.post(`/api/admin/articles`, 
         { title, content },
         { headers: { Authorization: `Bearer ${authToken}` }}
       )
