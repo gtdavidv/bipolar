@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import axios from 'axios'
 import './AdminManage.css'
+import { API_BASE } from '../App.jsx'
 
 const AdminManage = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false)
@@ -26,7 +27,7 @@ const AdminManage = () => {
     setLoading(true)
     
     try {
-      const response = await axios.post('/api/admin/login', { password })
+      const response = await axios.post(`${API_BASE}/api/admin/login`, { password })
       const token = response.data.token
       
       setAuthToken(token)
@@ -61,7 +62,7 @@ const AdminManage = () => {
 
     setDeleteLoading(slug)
     try {
-      await axios.delete(`/api/admin/articles/${slug}`, {
+      await axios.delete(`${API_BASE}/api/admin/articles/${slug}`, {
         headers: { Authorization: `Bearer ${authToken}` }
       })
       setMessage(`Article "${title}" deleted successfully!`)
