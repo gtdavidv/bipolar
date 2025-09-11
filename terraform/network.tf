@@ -378,6 +378,27 @@ resource "aws_cloudfront_distribution" "fe" {
     cached_methods         = ["GET","HEAD"]
     cache_policy_id        = "658327ea-f89d-4fab-a63d-7e88639e58f6" # CachingOptimized managed policy
   }
+  
+  origin {
+    domain_name = "bipolar-alb-700384359.us-east-1.elb.amazonaws.com"
+    origin_id   = "alb-backend"
+    custom_origin_config {
+      origin_protocol_policy = "http-only" # ALB accepts HTTP from CF
+      http_port              = 80
+      https_port             = 443
+      origin_ssl_protocols   = ["TLSv1.2"]
+    }
+  }
+  
+  ordered_cache_behavior {
+    path_pattern           = "/api/*"
+    target_origin_id       = "alb-backend"
+    viewer_protocol_policy = "redirect-to-https"
+    allowed_methods        = ["GET","HEAD","OPTIONS","PUT","POST","PATCH","DELETE"]
+    cached_methods         = ["GET","HEAD"]
+    cache_policy_id        = "4135ea2d-6df8-44a3-9df3-4b5a84be39ad" # CachingDisabled managed policy
+    origin_request_policy_id = "216adef6-5c7f-47e4-b989-5492eafa07d3" # AllViewer
+  }
 
   # SPA-friendly errors: serve index.html for 403/404
   custom_error_response {

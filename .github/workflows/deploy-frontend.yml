@@ -17,6 +17,7 @@ jobs:
     env:
       FE_BUCKET: terraform-20250907201205156800000001
       CF_DIST_ID: E1NXDXKR1Q01XI
+      REACT_APP_API_BASE_URL: http://bipolar-alb-700384359.us-east-1.elb.amazonaws.com
     steps:
       - uses: actions/checkout@v4
 
