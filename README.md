@@ -132,7 +132,7 @@ OPENAI_KEY=your-openai-api-key
 ### Common Issues
 
 1. **API Key Error**:
-   - Ensure `OPENAI_KEY` is set in backend/.env
+   - Ensure `` is set in backend/.env
    - Verify the API key is valid and has credits
 
 2. **Port Conflicts**:

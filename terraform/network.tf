@@ -211,9 +211,12 @@ resource "aws_lb_target_group" "api" {
   protocol = "HTTP"
   vpc_id   = aws_vpc.main.id
   health_check {
-    path = "/"
+    path = "/health"
     matcher = "200-399"
     interval = 30
+    timeout = 6
+    healthy_threshold = 2
+    unhealthy_threshold = 5
   }
   target_type = "ip"
 }
@@ -256,7 +259,7 @@ resource "aws_ecs_task_definition" "api" {
     essential   = true
     environment = []
     secrets     = [{
-      name      = "OPENAI_API_KEY",
+      name      = "OPENAI_KEY",
       valueFrom = "${data.aws_secretsmanager_secret.openai.arn}:bipolar_openai_key::"
     }]
   }])
