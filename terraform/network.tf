@@ -161,11 +161,15 @@ resource "aws_iam_role_policy_attachment" "task_exec_attach1" {
 }
 
 data "aws_secretsmanager_secret" "openai" { name = "bipolar_openai_key" }
+data "aws_secretsmanager_secret" "admin" { name = "bipolar_admin_password" }
 
 data "aws_iam_policy_document" "exec_sm_read" {
   statement {
     actions   = ["secretsmanager:GetSecretValue"]
-    resources = [data.aws_secretsmanager_secret.openai.arn]
+    resources = [
+      data.aws_secretsmanager_secret.openai.arn,
+      data.aws_secretsmanager_secret.admin.arn
+    ]
   }
 }
 resource "aws_iam_policy" "exec_sm_read" {
@@ -258,10 +262,10 @@ resource "aws_ecs_task_definition" "api" {
     }
     essential   = true
     environment = []
-    secrets     = [{
-      name      = "OPENAI_KEY",
-      valueFrom = "${data.aws_secretsmanager_secret.openai.arn}:bipolar_openai_key::"
-    }]
+    secrets     = [
+      {name = "OPENAI_KEY", valueFrom = "${data.aws_secretsmanager_secret.openai.arn}:bipolar_openai_key::"},
+      {name = "ADMIN_PASSWORD", valueFrom = "${data.aws_secretsmanager_secret.admin.arn}:bipolar_admin_password::"}
+    ]
   }])
   runtime_platform {
     operating_system_family="LINUX"

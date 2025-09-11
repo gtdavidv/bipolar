@@ -1,46 +1,17 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import axios from 'axios'
+import AdminAuth from './AdminAuth'
+import useAuth from '../hooks/useAuth'
 import './AddArticle.css'
-//import { API_BASE } from '../App.jsx'
 
 const AddArticle = () => {
   const navigate = useNavigate()
-  const [isAuthenticated, setIsAuthenticated] = useState(false)
-  const [password, setPassword] = useState('')
-  const [authToken, setAuthToken] = useState('')
+  const { authToken } = useAuth()
   const [article, setArticle] = useState({ title: '', content: '' })
   const [loading, setLoading] = useState(false)
   const [message, setMessage] = useState('')
 
-  useEffect(() => {
-    const token = localStorage.getItem('admin-token')
-    if (token) {
-      setAuthToken(token)
-      setIsAuthenticated(true)
-    }
-  }, [])
-
-  const handleLogin = async (e) => {
-    e.preventDefault()
-    setLoading(true)
-    
-    try {
-      const response = await axios.post(`/api/admin/login`, { password })
-      const token = response.data.token
-      
-      setAuthToken(token)
-      setIsAuthenticated(true)
-      localStorage.setItem('admin-token', token)
-      setPassword('')
-      setMessage('Login successful!')
-    } catch (error) {
-      setMessage('Invalid password')
-      console.error('Login error:', error)
-    } finally {
-      setLoading(false)
-    }
-  }
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -75,48 +46,10 @@ const AddArticle = () => {
     }
   }
 
-  const handleLogout = () => {
-    setIsAuthenticated(false)
-    setAuthToken('')
-    localStorage.removeItem('admin-token')
-    setArticle({ title: '', content: '' })
-    setMessage('')
-  }
-
-  if (!isAuthenticated) {
-    return (
-      <div className="add-article-container">
-        <div className="admin-login">
-          <h2>Admin Access Required</h2>
-          <p>Please enter the admin password to add a new article.</p>
-          <form onSubmit={handleLogin}>
-            <div className="form-group">
-              <label htmlFor="password">Admin Password:</label>
-              <input
-                type="password"
-                id="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="Enter admin password"
-                required
-              />
-            </div>
-            <button type="submit" disabled={loading} className="login-btn">
-              {loading ? 'Logging in...' : 'Login'}
-            </button>
-          </form>
-          {message && <div className="message error">{message}</div>}
-          
-          <div className="back-to-site">
-            <Link to="/" className="back-link">← Back to Chat</Link>
-            <Link to="/articles" className="back-link">Browse Articles</Link>
-          </div>
-        </div>
-      </div>
-    )
-  }
 
   return (
+    <AdminAuth title="Add New Article">
+      {({ logout }) => (
     <div className="add-article-container">
       <header className="add-article-header">
         <div className="header-content">
@@ -124,7 +57,7 @@ const AddArticle = () => {
           <div className="header-actions">
             <Link to="/articles" className="nav-btn">Browse Articles</Link>
             <Link to="/" className="nav-btn">Back to Chat</Link>
-            <button onClick={handleLogout} className="logout-btn">Logout</button>
+            <button onClick={logout} className="logout-btn">Logout</button>
           </div>
         </div>
       </header>
@@ -189,6 +122,8 @@ const AddArticle = () => {
         </form>
       </main>
     </div>
+      )}
+    </AdminAuth>
   )
 }
 

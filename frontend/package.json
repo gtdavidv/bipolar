@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "Bipolar disorder React frontend",
   "private": true,
+  "proxy": "http://localhost:8000",
   "scripts": {
     "dev": "vite",
     "build": "vite build",

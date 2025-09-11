@@ -1,49 +1,22 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import axios from 'axios'
+import AdminAuth from './AdminAuth'
+import useAuth from '../hooks/useAuth'
 import './AdminManage.css'
-//import { API_BASE } from '../App.jsx'
 
 const AdminManage = () => {
-  const [isAuthenticated, setIsAuthenticated] = useState(false)
-  const [password, setPassword] = useState('')
-  const [authToken, setAuthToken] = useState('')
+  const { authToken } = useAuth()
   const [articles, setArticles] = useState([])
   const [loading, setLoading] = useState(false)
   const [message, setMessage] = useState('')
   const [deleteLoading, setDeleteLoading] = useState(null)
 
   useEffect(() => {
-    const token = localStorage.getItem('admin-token')
-    if (token) {
-      setAuthToken(token)
-      setIsAuthenticated(true)
-      fetchArticles(token)
+    if (authToken) {
+      fetchArticles(authToken)
     }
-  }, [])
-
-  const handleLogin = async (e) => {
-    e.preventDefault()
-    setLoading(true)
-    
-    try {
-      const response = await axios.post(`/api/admin/login`, { password })
-      const token = response.data.token
-      
-      setAuthToken(token)
-      setIsAuthenticated(true)
-      localStorage.setItem('admin-token', token)
-      setPassword('')
-      setMessage('Login successful!')
-      
-      await fetchArticles(token)
-    } catch (error) {
-      setMessage('Invalid password')
-      console.error('Login error:', error)
-    } finally {
-      setLoading(false)
-    }
-  }
+  }, [authToken])
 
   const fetchArticles = async (token) => {
     try {
@@ -75,49 +48,10 @@ const AdminManage = () => {
     }
   }
 
-  const handleLogout = () => {
-    setIsAuthenticated(false)
-    setAuthToken('')
-    localStorage.removeItem('admin-token')
-    setArticles([])
-    setMessage('')
-  }
-
-  if (!isAuthenticated) {
-    return (
-      <div className="admin-manage-container">
-        <div className="admin-login">
-          <h2>Admin Access Required</h2>
-          <p>Please enter the admin password to manage articles.</p>
-          <form onSubmit={handleLogin}>
-            <div className="form-group">
-              <label htmlFor="password">Admin Password:</label>
-              <input
-                type="password"
-                id="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="Enter admin password"
-                required
-              />
-            </div>
-            <button type="submit" disabled={loading} className="login-btn">
-              {loading ? 'Logging in...' : 'Login'}
-            </button>
-          </form>
-          {message && <div className="message error">{message}</div>}
-          
-          <div className="back-to-site">
-            <Link to="/" className="back-link">← Back to Chat</Link>
-            <Link to="/articles" className="back-link">Browse Articles</Link>
-            <Link to="/admin/add-article" className="back-link">Add Article</Link>
-          </div>
-        </div>
-      </div>
-    )
-  }
 
   return (
+    <AdminAuth title="Manage Articles">
+      {({ logout }) => (
     <div className="admin-manage-container">
       <header className="admin-header">
         <div className="header-content">
@@ -126,7 +60,7 @@ const AdminManage = () => {
             <Link to="/admin/add-article" className="nav-btn primary">Add New Article</Link>
             <Link to="/articles" className="nav-btn">Browse Articles</Link>
             <Link to="/" className="nav-btn">Back to Chat</Link>
-            <button onClick={handleLogout} className="logout-btn">Logout</button>
+            <button onClick={logout} className="logout-btn">Logout</button>
           </div>
         </div>
       </header>
@@ -208,6 +142,8 @@ const AdminManage = () => {
         )}
       </main>
     </div>
+      )}
+    </AdminAuth>
   )
 }
 

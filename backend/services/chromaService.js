@@ -9,7 +9,7 @@ class ChromaService {
     // Initialize local embedding model (sentence-transformers)
     this.embedder = import('@langchain/community/embeddings/hf_transformers')
       .then(m => new (m.HuggingFaceTransformersEmbeddings ?? m.HfTransformersEmbeddings ?? m.default)({
-        modelName: 'sentence-transformers/all-MiniLM-L6-v2',
+        modelName: 'Xenova/all-MiniLM-L6-v2',
       }));
     
     this.collection = null;
